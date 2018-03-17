@@ -5,7 +5,7 @@
 
 std::pair<size_t, size_t> f(size_t size, size_t personCount) {
 
-    size_t zones = 1;
+    long long zones = 1;
 
     while (zones <= personCount) {
         zones *= 2;
@@ -14,17 +14,17 @@ std::pair<size_t, size_t> f(size_t size, size_t personCount) {
     if (zones > 1)
         zones /= 2;
 
-    size_t rem = personCount - (zones - 1);
+    long long rem = personCount - (zones - 1);
 
     auto div = std::div((long long)(size - (zones - 1)), zones);
 
     if (div.rem >= rem) {
 
-        auto dist = std::div((size_t)div.quot, 2);
+        auto dist = std::div((long long)div.quot, (long long)2);
         return std::make_pair(dist.rem ? dist.quot + 1 : dist.quot, dist.quot);
     } else {
     
-        auto dist = std::div((size_t)div.quot - 1, 2);
+        auto dist = std::div((long long)div.quot - 1, (long long)2);
         return std::make_pair(dist.rem ? dist.quot + 1 : dist.quot, dist.quot);
     }
 }
