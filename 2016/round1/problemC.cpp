@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <set>
+#include <map>
 #include <utility>
 #include <algorithm>
 
@@ -59,15 +59,20 @@ size_t circleLength(Friends &f) {
         chain_max_lenght = std::max(chain_max_lenght, c.length);
 
     if (chains.size() > 1) {
+        std::map<std::pair<size_t, size_t>, size_t> coupound_chains;
         for (size_t idx = 0; idx < chains.size() - 1; idx++) { // chains combinations
             for (size_t rem = idx + 1; rem < chains.size(); rem++) {
                 const auto &chainA = chains[idx], &chainB = chains[rem];
                 if (chainA.match(chainB)) {
                     size_t sum = chainA.length + chainB.length - 2 /* do not count bottom twice */;
-                    chain_max_lenght = std::max(sum, chain_max_lenght);
+                    coupound_chains[chainB.bottom] = std::max(sum, coupound_chains[chainB.bottom]);
                 }
             }
         }
+        size_t max_coupound_chains = 0;
+        for (const auto &c : coupound_chains)
+            max_coupound_chains += c.second;
+        chain_max_lenght = std::max(chain_max_lenght, max_coupound_chains);
     }
     return std::max(round_max, chain_max_lenght);
 }
