@@ -30,28 +30,20 @@ std::vector<bool> flip(std::vector<bool> &v, size_t size, size_t idx) {
 }
 
 std::optional<size_t> find(std::vector<bool> &v, size_t size, size_t first_idx = 0, size_t flip_count = 0) {
-    if (allHappy(v))
-        return flip_count;
 
-    std::optional<size_t> min;
-
-    if (first_idx < v.size() - size + 1) {
-        auto r = find(v, size, first_idx + 1, flip_count); // no flip here
-        if (r) {
-            if (!min || min.value() > r.value())
-                 min = r;
-        }
-
-        flip(v, size, first_idx);
-
-        r = find(v, size, first_idx + 1, flip_count + 1); // no flip here
-        if (r) {
-            if (!min || min.value() > r.value())
-                 min = r;
-        }
-        flip(v, size, first_idx);
+    size_t min = 0;
+    for (size_t i = 0; i < v.size() - size + 1; i++) {
+        if (v[i])
+            continue;
+        flip(v, size, i);
+        min++;
+        if (allHappy(v))
+            return min;
     }
-    return min;
+    if (allHappy(v))
+        return min;
+    else
+        return {};
 }
 
 int main(int argc, char **argv)
