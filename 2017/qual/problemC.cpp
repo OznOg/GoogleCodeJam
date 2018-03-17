@@ -3,38 +3,30 @@
 #include <set>
 #include <utility>
 
-struct Compare {
-    bool operator()(const size_t &lhs, const size_t &rhs) const 
-    {
-        return lhs > rhs;
-    }
-};
+std::pair<size_t, size_t> f(size_t size, size_t personCount) {
 
-using Zones = std::multiset<size_t, Compare>;
+    size_t zones = 1;
 
-std::pair<size_t, size_t> f(const Zones &zones, size_t personCount/* kinda depth?*/) {
-
-    if (zones.size() < personCount) {
-        Zones sub_zones;
-        for (const auto &z : zones) {
-                auto div = std::div(z, 2);
-                sub_zones.insert(div.rem == 0 && div.quot != 0 ? div.quot - 1 : div.quot);
-                sub_zones.insert(div.quot); 
-                personCount--;
-        }
-        return f(sub_zones, personCount);
+    while (zones <= personCount) {
+        zones *= 2;
     }
 
-    size_t max, min;
-    for (const auto &z : zones) {
-        auto div = std::div(z, 2);
-        max = div.quot;
-        min = (div.rem == 0 && div.quot != 0 ? div.quot - 1 : div.quot);
-        personCount--;
-        if (personCount == 0)
-            break;
+    if (zones > 1)
+        zones /= 2;
+
+    size_t rem = personCount - (zones - 1);
+
+    auto div = std::div((long long)(size - (zones - 1)), zones);
+
+    if (div.rem >= rem) {
+
+        auto dist = std::div((size_t)div.quot, 2);
+        return std::make_pair(dist.rem ? dist.quot + 1 : dist.quot, dist.quot);
+    } else {
+    
+        auto dist = std::div((size_t)div.quot - 1, 2);
+        return std::make_pair(dist.rem ? dist.quot + 1 : dist.quot, dist.quot);
     }
-    return std::make_pair(max, min);
 }
 
 int main(int argc, char **argv)
@@ -45,8 +37,7 @@ int main(int argc, char **argv)
     for (size_t count = 1; count <= test_cases_count; count++) {
         size_t size, personCount;
         std::cin >> size >> personCount;
-        Zones v = { size };
-        auto r = f(v, personCount);
+        auto r = f(size, personCount);
         std::cout << "Case #" << count << ": " << r.first << " " << r.second << std::endl;
     }
     return 0;
