@@ -1,13 +1,7 @@
 #include <array>
 #include <iostream>
 #include <cstdlib>
-
-
-bool seenAll(const std::array<bool, 10> &seen) {
-    for (const auto &b : seen)
-        if (!b) return false;
-    return true;
-}
+#include <cmath>
 
 bool isClean(size_t N) {
     size_t last = 9;
@@ -22,11 +16,38 @@ bool isClean(size_t N) {
     return true;
 }
 
-size_t lastClean(size_t N) {
-    while (!isClean(N))
-        N--;
+std::string lastClean(const std::string &N) {
+    std::string s = N;
 
-   return N;
+    bool clean = true;
+    size_t where = 0;
+    for (size_t i = 1; i < N.size(); i++) {
+        uint8_t next = s[i] - '0';
+        uint8_t curr = s[where] - '0';
+        if (curr < next) {
+            // OK
+            where = i;
+        } else if (curr == next) {
+            // don't move where
+        } else {
+            clean = false;
+            break;
+        }
+    }
+
+    if (clean)
+        return s; // string was already OK
+
+    s[where] -= 1;
+
+    for (size_t i = where + 1; i < N.size(); i++)
+        s[i] = '9';
+
+    if (s[0] == '0') {
+        return s.substr(1);
+    }
+
+    return s;
 }
 
 
@@ -36,8 +57,9 @@ int main(int argc, char **argv)
     std::cin >> test_cases_count;
 
     for (size_t count = 1; count <= test_cases_count; count++) {
-        size_t value;
+        std::string value;
         std::cin >> value;
+
         std::cout << "Case #" << count << ": " << lastClean(value) << std::endl;
     }
     return 0;
