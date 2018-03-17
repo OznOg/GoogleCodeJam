@@ -1,10 +1,12 @@
 #include <functional>
+#include <algorithm>
 #include <iostream>
 #include <vector>
 #include <string>
 #include <utility>
 #include <algorithm>
 #include <set>
+#include <map>
 
 #include <experimental/optional>
 
@@ -21,9 +23,14 @@ std::vector<std::pair<std::string, uint8_t>> numbers = {
 };
 
 
+// I use a map to pick entries depending on the letter the contain:
+// for example Z is only present in "ZERO".
+std::map<uint8_t, std::set<std::pair<std::string, uint8_t>>> map;
+
+
 bool eraseAllOf(std::string &str, const std::string &entry) {
 
-    for (auto &c : entry) {
+    for (const auto &c : entry) {
         auto pos = str.find(c);
         if (pos == std::string::npos)
             return false;
@@ -33,14 +40,16 @@ bool eraseAllOf(std::string &str, const std::string &entry) {
 }
 
 std::optional<std::string> getPhoneNumber(const std::string &str, const std::string &phone = "") {
-    if (str.empty()) //nothing to be done left; phone must be correct
-        return phone;
+    if (str.empty()) { //nothing to be done left; phone must be correct
+        auto sorted_phone = phone;
+        std::sort(sorted_phone.begin(), sorted_phone.end());
+        return std::move(sorted_phone); // the phone is said to be sorted in the problem definition
+    }
 
-    for (auto &entry : numbers) {
+    for (const auto &entry : map[str[0]]) { //Loop over entries that can have the fist letter
         auto s = str;
         bool res = eraseAllOf(s, entry.first);
         if (res) {
-            auto &&new_phone = std::string(phone).append(1, entry.second);
             auto success = getPhoneNumber(s, std::string(phone).append(1, entry.second));
             if (success)
                 return std::move(success);
@@ -55,9 +64,20 @@ int main(int argc, char **argv)
     size_t test_cases_count; 
     std::cin >> test_cases_count;
 
+    for (auto &e : numbers) {
+        for (auto &c : e.first)
+            map[c].insert(e);
+    }
+
     for (size_t count = 1; count <= test_cases_count; count++) {
         std::string s;
         std::cin >> s;
+        std::sort(s.begin(), s.end(), [](const int a, const int b) { 
+                return map[a].size() < map[b].size();
+                }); // I sort the input lettrers with respect to the number of
+                    // entries they may refer to; letters with feer entries first.
+                    // This really make the search faster by removing fastly letters
+                    // that have a direct correspondance with the number
         const auto &l = getPhoneNumber(s);
         std::cout << "Case #" << count << ": " << l.value() << std::endl;
     }
